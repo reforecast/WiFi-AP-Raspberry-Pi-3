@@ -51,7 +51,7 @@ subnet $IP_RANGE.0 netmask 255.255.255.0 {
 echo "$CONF" >> /etc/dhcp/dhcpd.conf
 
 # set where DHCP runs
-sed -i.bak "s/\(INTERFACES *= *\).*/\1\"$WIFI\"/" /etc/default/isc-dhcp-server
+sed -i.bak "s/\(INTERFACESv4=*\).*/\1\"wlan0\"/" /etc/default/isc-dhcp-server
 
 # set static ip address for $WIFI
 INTERF_CONF="
@@ -72,7 +72,7 @@ iface $WIFI inet static
   netmask 255.255.255.0
 "
 echo "$INTERF_CONF" > /etc/network/interfaces
-ifconfig $WLAN $IP_RANGE.1
+ifconfig $WIFI $IP_RANGE.1
 
 # setup hostapd.conf
 CONF_HOST="interface=$WIFI
@@ -100,7 +100,7 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 # add iptables
 iptables -t nat -F
 iptables -F
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o $INC -j MASQUERADE
 iptables -A FORWARD -i $INC -o $WIFI -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -i $WIFI -o $INC -j ACCEPT
 # save iptables
